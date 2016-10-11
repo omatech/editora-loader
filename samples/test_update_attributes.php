@@ -32,8 +32,8 @@ $loader->update_values($inst_id, $values);
 $inst_id=$loader->insert_instance(270, 'Centre Aptima TEST', $values);
 echo "Instancia creada $inst_id \n";
 
-$loader->delete_instance(996);
-$loader->delete_instance(997);
+//$loader->delete_instance(996);
+//$loader->delete_instance(997);
 
 
 
