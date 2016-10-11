@@ -1,0 +1,14 @@
+{
+    "name": "omatech/editora-loader",
+    "description": "Load information to Editora",
+		"minimum-stability":"dev",
+    "require": {
+        "doctrine/dbal": "~2.5"
+    },
+		"autoload": {
+				"psr-4": {
+						"Omatech\\": "src/Omatech"
+				}
+    }
+}
+
