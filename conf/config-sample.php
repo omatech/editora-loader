@@ -44,3 +44,8 @@ $config_array=[
 	, 'dbpass'=>dbpass
 	, 'dbname'=>dbname
 ];
+
+$available_hosts=[
+		'http://xxx.yyy.com/geocoder/gmaps_proxy.php?str='
+	, 'http://xxx.yyy.com/geocoder/gmaps_proxy.php?str='
+];
