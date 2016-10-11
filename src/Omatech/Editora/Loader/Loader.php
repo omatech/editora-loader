@@ -117,7 +117,7 @@ class Loader {
 				}
 
 				$sql="insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date)
-						values ($class_id, ".self::$conn->quote($nom_intern).", $status, $publishing_begins, $publishing_ends, now(), now())";
+						values ($class_id, ".self::$conn->quote($nom_intern).", $status, $publishing_begins, $publishing_ends, now(), 0)";
 				self::$conn->executeQuery($sql);
 				$inst_id=self::$conn->lastInsertId();
 				$this->update_values($inst_id, ['nom_intern'=>$nom_intern]);
