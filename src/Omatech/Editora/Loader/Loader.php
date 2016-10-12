@@ -165,7 +165,7 @@ class Loader {
 		public function get_inst_id_from_numeric_value ($class_tag, $atri, $value) 
 	  {// retorna -1 si no existeix la instancia d'aquesta class o el id si existeix
 				$class_tag = self::$conn->quote($class_tag);
-				$value = self::$conn->quote($value);
+				//$value = self::$conn->quote($value);
 
 				$atri_info = $this->get_attr_info($atri);
 				$atri_id=$atri_info['id'];
