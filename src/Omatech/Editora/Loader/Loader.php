@@ -36,8 +36,8 @@ class Loader {
 				self::$geocoder = $geocoder;
 		}
 
-		public function delete_instance($inst_id) {
-
+		public function delete_instance($inst_id) 
+		{
 				self::$conn->executeQuery('start transaction');
 				$sql_values = 'DELETE
 				FROM omp_values 
@@ -172,6 +172,67 @@ class Loader {
 				";
 				$row=self::$conn->fetchAssoc($sql);
 				return ($row['num']==1);
+		}
+		
+		public function existing_instance_is_different ($inst_id, $nom_intern, $values, $status='O', &$difference, &$attr_difference)
+		{// -1 instance not exist
+		 // -2 status is different
+		 // -3 nom_intern is different
+		 // -4 some value is different
+		 // 0 same!
+				
+				if (!$this->exist_instance($inst_id)) return -1;
+				
+				$sql="select * 
+				from omp_instances
+				where inst_id=$inst_id";
+				$current_inst=self::$conn->fetchAssoc($sql);
+				if ($status!=$current_inst['status'])
+				{
+						$difference=-1;
+						return true;
+				}
+				
+				if ($nom_intern!=$current_inst['key_fields'])
+				{
+						$difference=-2;
+						return true;
+				}
+				
+				$sql="select a.name, a.type, v.text_val, v.num_val, v.date_val 
+				from omp_values v
+				, omp_attributes a
+				where a.id=v.atri_id
+				and v.inst_id=$inst_id";
+				
+				$rows=self::$conn->fetchAll($sql);
+				foreach ($rows as $row)
+				{
+						if (array_key_exists($row['name'],$values))
+						{
+								if (!empty($row['text_val']) && $values[$row['name']]!=$row['text_val'])
+								{
+										$difference=-2;
+										$attr_difference=$row['name'];
+										return true;
+								}
+								if (!empty($row['num_val']) && $values[$row['name']]!=$row['num_val'])
+								{
+										$difference=-2;
+										$attr_difference=$row['name'];
+										return true;
+								}
+								if (!empty($row['date_val']) && $values[$row['name']]!=$row['date_val'])
+								{
+										$difference=-2;
+										$attr_difference=$row['name'];
+										return true;
+								}
+						}
+				}
+				
+				$difference=0;
+				return false;
 		}
 		
 		public function update_instance ($inst_id, $nom_intern, $values, $status='O', $publishing_begins=null, $publishing_ends=null)
