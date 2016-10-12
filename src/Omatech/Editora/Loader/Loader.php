@@ -10,7 +10,7 @@ class Loader {
 		public static $file_base = '';
 		public static $url_base = '';
 		public static $geocoder;
-		private static $conn;
+		public static $conn;
 
 		public function __construct($conn, $file_base, $url_base, $geocoder=null, $debug=false) {
 				if (is_array($conn)) {
