@@ -79,6 +79,88 @@ class Loader {
 				return true;
 		}
 		
+		
+		public function exist_instance ($inst_id)
+		{
+				$sql="select count(*) num 
+				from omp_instances
+				where id=$inst_id
+				";
+				$row=self::$conn->fetchAssoc($sql);
+				return ($row['num']==1);
+		}
+		
+		public function update_instance ($inst_id, $nom_intern, $values, $status='O', $publishing_begins=null, $publishing_ends=null)
+		{
+				if (!$this->exist_instance($inst_id)) return false;
+				
+				self::$conn->executeQuery('start transaction');
+				$status=self::$conn->quote($status);
+				
+				if ($publishing_begins==null)
+				{
+						$publishing_begins='now()';
+				}
+				else
+				{
+						if (is_int($publishing_begins))
+						{// es un timestamp
+								$publishing_begins=self::$conn->quote(date("Y-m-d H:m:s", $publishing_begins));
+						}
+						else
+						{// confiem que esta en el format correcte
+								$publishing_begins=self::$conn->quote($publishing_begins);								
+						}
+				}
+				
+				if ($publishing_ends==null)
+				{
+						$publishing_ends='null';
+				}
+				else
+				{
+						if (is_int($publishing_ends))
+						{// es un timestamp
+								$publishing_ends=self::$conn->quote(date("Y-m-d H:m:s", $publishing_ends));
+						}
+						else
+						{// confiem que esta en el format correcte
+								$publishing_ends=self::$conn->quote($publishing_ends);								
+						}
+				}
+
+				$sql="update omp_instances
+				set key_fields=".self::$conn->quote($nom_intern)."
+				, status=$status
+				, publishing_begins=$publishing_begins
+				, publishing_ends=$publishing_ends
+				, update_date=now()
+				where id=$inst_id
+				";
+				self::$conn->executeQuery($sql);
+				
+				$ret=$this->update_values($inst_id, ['nom_intern'=>$nom_intern]);
+				if (!$ret)
+				{
+						self::$conn->executeQuery('rollback');
+						return false;
+				}
+
+				$ret=$this->update_values($inst_id, $values);
+				if (!$ret)
+				{
+						self::$conn->executeQuery('rollback');
+						return false;
+				}
+
+				$sql="update omp_instances set update_date=now() where id=$inst_id";
+				self::$conn->executeQuery($sql);
+				
+				self::$conn->executeQuery('commit');
+				return $inst_id;
+		}
+		
+		
 		public function insert_instance ($class_id, $nom_intern, $values, $status='O', $publishing_begins=null, $publishing_ends=null)
 		{
 				self::$conn->executeQuery('start transaction');
@@ -120,8 +202,25 @@ class Loader {
 						values ($class_id, ".self::$conn->quote($nom_intern).", $status, $publishing_begins, $publishing_ends, now(), 0)";
 				self::$conn->executeQuery($sql);
 				$inst_id=self::$conn->lastInsertId();
-				$this->update_values($inst_id, ['nom_intern'=>$nom_intern]);
-				$this->update_values($inst_id, $values);
+				
+				$ret=$this->update_values($inst_id, ['nom_intern'=>$nom_intern]);
+				if (!$ret)
+				{
+						self::$conn->executeQuery('rollback');
+						return false;
+				}
+
+				$ret=$this->update_values($inst_id, $values);
+				if (!$ret)
+				{
+						self::$conn->executeQuery('rollback');
+						return false;
+				}
+
+
+				$sql="update omp_instances set update_date=now() where id=$inst_id";
+				self::$conn->executeQuery($sql);
+				
 				self::$conn->executeQuery('commit');
 				return $inst_id;
 		}
@@ -129,13 +228,11 @@ class Loader {
 		public function update_values($inst_id, $values) 
 		{
 				$results = array();
-				self::$conn->executeQuery('start transaction');
 				foreach ($values as $key => $value) 
         {
 						$attr_info = self::get_attr_info($key);
 						if (empty($attr_info)) 
 						{
-								self::$conn->executeQuery('rollback');
 								echo("No existeix l'attribut: $key\n");
 								return false;
 						}
@@ -168,10 +265,7 @@ class Loader {
 							}
             }
         }
-				$sql="update omp_instances set update_date=now() where id=$inst_id";
-				self::$conn->executeQuery($sql);
-				self::$conn->executeQuery('commit');
-
+				return true;
     }
 
 		
