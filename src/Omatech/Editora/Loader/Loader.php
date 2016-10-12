@@ -408,9 +408,10 @@ class Loader {
 				if ($this->exist_value($inst_id, $atri_id))
 				{// update
 						$sql="update omp_values v
-						set text_val=$value
+						set v.text_val=$value
 						where v.inst_id=$inst_id
-						and v.atri_id=$atri_id					  
+						and v.atri_id=$atri_id
+						and v.text_val!=$value
 						";
 				}
 				else
@@ -427,9 +428,10 @@ class Loader {
 				if ($this->exist_value($inst_id, $atri_id))
 				{// update
 						$sql="update omp_values v
-						set text_val=$value
+						set v.text_val=$value
 						where v.inst_id=$inst_id
 						and v.atri_id=$atri_id					  
+						and v.text_val!=$value
 						";
 				}
 				else
@@ -454,9 +456,10 @@ class Loader {
 				if ($this->exist_value($inst_id, $atri_id))
 				{// update
 						$sql="update omp_values v
-						set num_val=$value
+						set v.num_val=$value
 						where v.inst_id=$inst_id
 						and v.atri_id=$atri_id					  
+						and v.num_val!=$value
 						";
 				}
 				else
@@ -475,9 +478,10 @@ class Loader {
 				if ($this->exist_value($inst_id, $atri_id))
 				{// update
 						$sql="update omp_values v
-						set num_val=$value
+						set v.num_val=$value
 						where v.inst_id=$inst_id
 						and v.atri_id=$atri_id					  
+						and v.num_val!=$value
 						";
 				}
 				else
@@ -494,9 +498,10 @@ class Loader {
 				if ($this->exist_value($inst_id, $atri_id))
 				{// update
 						$sql="update omp_values v
-						set date_val=$value
+						set v.date_val=$value
 						where v.inst_id=$inst_id
 						and v.atri_id=$atri_id					  
+						and v.date_val!=$value
 						";
 				}
 				else
@@ -518,10 +523,11 @@ class Loader {
 				if ($this->exist_value($inst_id, $atri_id))
 				{// update
 						$sql="update omp_values v
-						set text_val=$value
+						set v.text_val=$value
 						, img_info='$width.$height'
 						where v.inst_id=$inst_id
 						and v.atri_id=$atri_id					  
+						and v.text_val!=$value
 						";
 				}
 				else
