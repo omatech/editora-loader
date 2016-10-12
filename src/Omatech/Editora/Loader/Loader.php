@@ -161,7 +161,36 @@ class Loader {
 				}
 				return -1;
 		}
-				
+
+		public function get_inst_id_from_numeric_value ($class_tag, $atri, $value) 
+	  {// retorna -1 si no existeix la instancia d'aquesta class o el id si existeix
+				$class_tag = self::$conn->quote($class_tag);
+				$value = self::$conn->quote($value);
+
+				$atri_info = $this->get_attr_info($atri);
+				$atri_id=$atri_info['id'];
+
+				$sql = "SELECT i.id
+				FROM omp_instances i
+				, omp_classes c
+				, omp_values v
+				WHERE 
+				 i.class_id = c.id
+				AND c.tag=$class_tag
+				AND v.inst_id = i.id
+				AND v.atri_id = $atri_id
+				AND v.num_val = $value
+				";
+
+				$row = self::$conn->fetchAssoc($sql);
+
+				if ($row) 
+				{
+						return $row['id'];
+				}
+				return -1;
+		}
+		
 		public function get_instance ($inst_id)
 		{
 				$sql="select * 
