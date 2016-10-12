@@ -105,11 +105,12 @@ class Loader {
 				{// no existeix, la creem
 				
 						// calculem el seguent pes per aquest pare
-						$sql = 'SELECT min(ri.weight)-10 weight
+						$sql = "SELECT min(ri.weight)-10 weight
 						FROM omp_relation_instances ri
 						WHERE ri.parent_inst_id = $parent_inst_id
 						and ri.rel_id=$rel_id
-						GROUP BY ri.rel_id, ri.parent_inst_id';
+						GROUP BY ri.rel_id, ri.parent_inst_id";
+						
 						$weight_row=self::$conn->fetchAssoc($sql);
 
 						if (empty($weight_row) || $weight_row["weight"] == -10) 
