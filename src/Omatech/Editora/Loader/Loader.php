@@ -79,6 +79,59 @@ class Loader {
 				return true;
 		}
 		
+		public function relation_instance_exist ($rel_id, $parent_inst_id, $child_inst_id)
+		{
+				$sql = "select id 
+				from omp_relation_instances 
+				where rel_id=$rel_id 
+				and parent_inst_id=$parent_inst_id 
+				and child_inst_id=$child_inst_id;";
+				$row = self::$conn->fetchAssoc($sql);
+				if ($row)
+				{
+						return $row['id'];
+				}
+				return false;
+		}
+
+		public function create_relation_instances($rel_id, $parent_inst_id, $child_inst_id)
+		{
+				$rel_instance_id=$this->relation_instance_exist ($rel_id, $parent_inst_id, $child_inst_id);
+				if ($rel_instance_id)
+				{
+						return $rel_instance_id;
+				}
+				else
+				{// no existeix, la creem
+				
+						// calculem el seguent pes per aquest pare
+						$sql = 'SELECT min(ri.weight)-10 weight
+						FROM omp_relation_instances ri
+						WHERE ri.parent_inst_id = $parent_inst_id
+						and ri.rel_id=$rel_id
+						GROUP BY ri.rel_id, ri.parent_inst_id';
+						$weight_row=self::$conn->fetchAssoc($sql);
+
+						if (empty($weight_row) || $weight_row["weight"] == -10) 
+						{
+								$weight = 100000;
+						} 
+						else 
+						{
+								$weight = $weight_row["weight"];
+						}
+
+
+						$sql = "insert into omp_relation_instances 
+						(rel_id, parent_inst_id , child_inst_id, weight, relation_date)
+						values
+						($rel_id, $parent_inst_id, $child_inst_id, $weight, NOW())";
+						$ret = self::$conn->executeQuery($sql);
+						return self::$conn->lastInsertId();;
+				}
+		}
+		
+		
 		public function get_inst_id_from_value ($class_tag, $atri, $value) 
 	  {// retorna -1 si no existeix la instancia d'aquesta class o el id si existeix
 				$class_tag = self::$conn->quote($class_tag);
@@ -255,7 +308,7 @@ class Loader {
 				return $inst_id;
 		}
 
-		public function update_values($inst_id, $values) 
+		private function update_values($inst_id, $values) 
 		{
 				$results = array();
 				foreach ($values as $key => $value) 
