@@ -94,7 +94,7 @@ class Loader {
 				return false;
 		}
 
-		public function create_relation_instances($rel_id, $parent_inst_id, $child_inst_id)
+		public function insert_relation_instances($rel_id, $parent_inst_id, $child_inst_id)
 		{
 				$rel_instance_id=$this->relation_instance_exist ($rel_id, $parent_inst_id, $child_inst_id);
 				if ($rel_instance_id)
