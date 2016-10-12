@@ -161,8 +161,25 @@ class Loader {
 				}
 				return -1;
 		}
-		
-		
+				
+		public function get_instance ($inst_id)
+		{
+				$sql="select * 
+				from omp_instances
+				where id=$inst_id";
+				$current_inst=self::$conn->fetchAssoc($sql);
+
+				$sql="select a.name, a.type, v.text_val, v.num_val, v.date_val 
+				from omp_values v
+				, omp_attributes a
+				where a.id=v.atri_id
+				and v.inst_id=$inst_id";
+				
+				$rows=self::$conn->fetchAll($sql);
+				
+				$current_inst['values']=$rows;
+				return $current_inst;
+		}
 		
 		public function exist_instance ($inst_id)
 		{
@@ -183,10 +200,7 @@ class Loader {
 				
 				if (!$this->exist_instance($inst_id)) return -1;
 				
-				$sql="select * 
-				from omp_instances
-				where inst_id=$inst_id";
-				$current_inst=self::$conn->fetchAssoc($sql);
+				$current_inst=$this->get_instance($inst_id);
 				if ($status!=$current_inst['status'])
 				{
 						$difference=-1;
@@ -199,14 +213,7 @@ class Loader {
 						return true;
 				}
 				
-				$sql="select a.name, a.type, v.text_val, v.num_val, v.date_val 
-				from omp_values v
-				, omp_attributes a
-				where a.id=v.atri_id
-				and v.inst_id=$inst_id";
-				
-				$rows=self::$conn->fetchAll($sql);
-				foreach ($rows as $row)
+				foreach ($current_inst['values'] as $row)
 				{
 						if (array_key_exists($row['name'],$values))
 						{
