@@ -225,6 +225,7 @@ class Loader {
 		 // -2 status is different
 		 // -3 nom_intern is different
 		 // -4 some value is different
+		 // -5 some value not exists in current instance
 		 // 0 same!
 				
 				if (!$this->exist_instance($inst_id)) return -1;
@@ -242,30 +243,44 @@ class Loader {
 						return true;
 				}
 				
+				$existing_attributes=[];
 				foreach ($current_inst['values'] as $row)
 				{
+						$existing_attributes[]=$row['name'];
 						if (array_key_exists($row['name'],$values))
 						{
 								if (!empty($row['text_val']) && $values[$row['name']]!=$row['text_val'])
 								{
-										$difference=-2;
+										$difference=-4;
 										$attr_difference=$row['name'];
 										return true;
 								}
 								if (!empty($row['num_val']) && $values[$row['name']]!=$row['num_val'])
 								{
-										$difference=-2;
+										$difference=-4;
 										$attr_difference=$row['name'];
 										return true;
 								}
 								if (!empty($row['date_val']) && $values[$row['name']]!=$row['date_val'])
 								{
-										$difference=-2;
+										$difference=-4;
 										$attr_difference=$row['name'];
 										return true;
 								}
 						}
 				}
+				
+				foreach ($values as $key=>$val)
+				{
+						if (!array_key_exists($key, $existing_attributes))
+						{
+								$difference=-5;
+								$attr_difference=$key;
+								return true;							
+						}
+				}
+				
+				
 				
 				$difference=0;
 				return false;
