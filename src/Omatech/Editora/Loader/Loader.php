@@ -272,7 +272,7 @@ class Loader {
 				
 				foreach ($values as $key=>$val)
 				{
-						if (!array_key_exists($key, $existing_attributes))
+						if (!in_array($key, $existing_attributes))
 						{
 								$difference=-5;
 								$attr_difference=$key;
