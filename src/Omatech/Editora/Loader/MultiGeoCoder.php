@@ -12,13 +12,16 @@ class MultiGeoCoder {
 		var $raw_response='';
 		var $raw_json=null;
 		var $results=array();
-		
-		function __construct($available_hosts) 
+
+		function __construct($available_hosts)
 		{
 				foreach ($available_hosts as $host)
 				{
 						$this->debug("Testing available host $host\n");
-						$ret=@file_get_contents($host.'test');
+                        $opts = array('http' => array('timeout' => 1));
+                        $context = stream_context_create($opts);
+
+						$ret=@file_get_contents($host.'test', false, $context);
 						if ($ret=='OK')
 						{
 								array_push($this->enabled_hosts, $host);
@@ -26,24 +29,24 @@ class MultiGeoCoder {
 						}
 						else
 						{
-								$this->debug("NOTFOUND $host\n");								
+								$this->debug("NOTFOUND $host\n");
 						}
 				}
-		
+
 				$this->debug("Available hosts after init\n");
 				$this->debug(print_r($this->enabled_hosts, true));
 		}
-		
+
 		function get_random_host()
 		{
 				return $this->enabled_hosts[array_rand($this->enabled_hosts)];
 		}
-		
+
 		function debug($str)
 		{
 				$this->debug_str.=$str;
 		}
-		
+
 		function geocode ($geostr)
 		{
 			$this->status='pending';
@@ -52,7 +55,7 @@ class MultiGeoCoder {
 			$raw_response='';
 		  $raw_json=null;
 		  $results=array();
-			
+
 			if (empty($this->enabled_hosts))
 			{
 					$this->debug("No podemos geolocalizar sin hosts!!!\n");
@@ -120,7 +123,7 @@ class MultiGeoCoder {
 				//$bounds=serialize($json['results'][0]['geometry']['bounds']);
 				$viewport=serialize($json['results'][0]['geometry']['viewport']);
 				//$provincia_id=$row['provincia_id'];
-				
+
 				$this->results['lat']=$lat;
 				$this->results['lng']=$lng;
 				$this->results['localidad']=$localidad;
@@ -139,28 +142,28 @@ class MultiGeoCoder {
 				$this->debug('CP: '.$cp."\n");
 				$this->debug('Provincia: '.$provincia."\n");
 				$this->debug('Comunidad: '.$comunidad."\n");
-				$this->debug('Country: '.$country."\n");		
+				$this->debug('Country: '.$country."\n");
 				$this->debug('Formatted Address: '.$formatted_address."\n");
 				$this->debug('lat: '.$lat."\n");
 				$this->debug('lng: '.$lng."\n");
 				$this->debug('bounds: '.$bounds."\n");
 				$this->debug('viewport: '.$viewport."\n");
-				$this->debug("\n");	
+				$this->debug("\n");
 				$this->status="ok";
 			}
 			else
 			{
 				$this->status="error";
-				
+
 				if (strpos($body, 'OVER_QUERY_LIMIT')===false)
 				{
 					$this->debug("ERROR INESPERADO!\n");
 				}
 				$row['response']=$body;
 				array_push($this->err_arr, $row);
-				$this->debug($body);		
+				$this->debug($body);
 			}
 
-			return $this->results;					
-		}		
+			return $this->results;
+		}
 }
