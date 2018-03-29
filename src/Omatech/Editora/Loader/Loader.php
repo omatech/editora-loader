@@ -128,7 +128,7 @@ class Loader {
 						values
 						($rel_id, $parent_inst_id, $child_inst_id, $weight, NOW())";
 						$ret = self::$conn->executeQuery($sql);
-						return self::$conn->lastInsertId();;
+						return self::$conn->lastInsertId();
 				}
 		}
 		
@@ -243,7 +243,7 @@ class Loader {
 						return true;
 				}
 				
-				$existing_attributes=[];
+				$existing_attributes=array();
 				foreach ($current_inst['values'] as $row)
 				{
 						$existing_attributes[]=$row['name'];
@@ -335,7 +335,7 @@ class Loader {
 				";
 				self::$conn->executeQuery($sql);
 				
-				$ret=$this->update_values($inst_id, ['nom_intern'=>$nom_intern]);
+				$ret=$this->update_values($inst_id, array('nom_intern'=>$nom_intern));
 				if (!$ret)
 				{
 						self::$conn->executeQuery('rollback');
@@ -357,6 +357,96 @@ class Loader {
 		}
 		
 		
+		public function update_urlnice ($nice_url,$inst_id,$language) {
+
+		    $sql="update omp_niceurl set niceurl='$nice_url' where inst_id=$inst_id and language='$language'";
+            self::$conn->executeQuery($sql);
+
+            self::$conn->executeQuery('commit');
+            return $inst_id;
+
+        }
+
+    public function insert_urlnice ($nice_url,$inst_id,$language) {
+
+        $sql = "insert into omp_niceurl 
+						(inst_id, language , niceurl)
+						values
+						($inst_id, '$language','$nice_url')";
+        $ret = self::$conn->executeQuery($sql);
+        return self::$conn->lastInsertId();
+
+    }
+		
+				
+		
+		public function insert_instance_with_external_id ($class_id, $nom_intern, $externalid, $batch_id, $values, $status='O', $publishing_begins=null, $publishing_ends=null)
+		{
+				self::$conn->executeQuery('start transaction');
+				$status=self::$conn->quote($status);
+				
+				if ($publishing_begins==null)
+				{
+						$publishing_begins='now()';
+				}
+				else
+				{
+						if (is_int($publishing_begins))
+						{// es un timestamp
+								$publishing_begins=self::$conn->quote(date("Y-m-d H:m:s", $publishing_begins));
+						}
+						else
+						{// confiem que esta en el format correcte
+								$publishing_begins=self::$conn->quote($publishing_begins);								
+						}
+				}
+				
+				if ($publishing_ends==null)
+				{
+						$publishing_ends='null';
+				}
+				else
+				{
+						if (is_int($publishing_ends))
+						{// es un timestamp
+								$publishing_ends=self::$conn->quote(date("Y-m-d H:m:s", $publishing_ends));
+						}
+						else
+						{// confiem que esta en el format correcte
+								$publishing_ends=self::$conn->quote($publishing_ends);								
+						}
+				}
+				
+				$external_id=$conn->quote($externalid);
+				$batch_id=$conn->quote($batch_id);
+
+				$sql="insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date, externalid, batch_id)
+						values ($class_id, ".self::$conn->quote($nom_intern).", $status, $publishing_begins, $publishing_ends, now(), 0, $external_id, $batch_id)";
+				self::$conn->executeQuery($sql);
+				$inst_id=self::$conn->lastInsertId();
+				
+				$ret=$this->update_values($inst_id, array('nom_intern'=>$nom_intern));
+				if (!$ret)
+				{
+						self::$conn->executeQuery('rollback');
+						return false;
+				}
+
+				$ret=$this->update_values($inst_id, $values);
+				if (!$ret)
+				{
+						self::$conn->executeQuery('rollback');
+						return false;
+				}
+
+
+				$sql="update omp_instances set update_date=now() where id=$inst_id";
+				self::$conn->executeQuery($sql);
+				
+				self::$conn->executeQuery('commit');
+				return $inst_id;
+		}
+
 		public function insert_instance ($class_id, $nom_intern, $values, $status='O', $publishing_begins=null, $publishing_ends=null)
 		{
 				self::$conn->executeQuery('start transaction');
