@@ -378,7 +378,17 @@ class Loader {
 
     }
 		
-				
+		public function delete_instances_in_batch ($batch_id)
+		{
+			$batch_id=self::$conn->quote($batch_id);
+			$sql="select id from omp_instances where batch_id=$batch_id";
+			$rows=self::$conn->fetchAssoc($sql);
+			foreach ($rows as $row)
+			{
+				$inst_id=$row['id'];
+				$this->delete_instance($inst_id);
+			}
+		}			
 		
 		public function insert_instance_with_external_id ($class_id, $nom_intern, $external_id, $batch_id, $values, $status='O', $publishing_begins=null, $publishing_ends=null)
 		{
