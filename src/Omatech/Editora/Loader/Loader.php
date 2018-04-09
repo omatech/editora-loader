@@ -143,7 +143,7 @@ class Loader {
 				WHERE 
 				 i.class_id = c.id
 				AND c.tag=$class_tag
-				AND i.key_values=$nom_intern
+				AND i.key_fields=$nom_intern
 				";
 
 				$row = self::$conn->fetchAssoc($sql);
