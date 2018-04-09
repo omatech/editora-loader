@@ -132,6 +132,30 @@ class Loader {
 				}
 		}
 		
+		public function get_inst_id_from_nom_intern ($class_tag, $nom_intern) 
+	  {// retorna -1 si no existeix la instancia d'aquesta class amb el nom intern indicat
+				$class_tag = self::$conn->quote($class_tag);
+				$nom_intern = self::$conn->quote($nom_intern);
+
+				$sql = "SELECT i.id
+				FROM omp_instances i
+				, omp_classes c
+				WHERE 
+				 i.class_id = c.id
+				AND c.tag=$class_tag
+				AND i.key_values=$nom_intern
+				";
+
+				$row = self::$conn->fetchAssoc($sql);
+
+				if ($row) 
+				{
+						return $row['id'];
+				}
+				return -1;
+		}
+		
+		
 		
 		public function get_inst_id_from_value ($class_tag, $atri, $value) 
 	  {// retorna -1 si no existeix la instancia d'aquesta class o el id si existeix
