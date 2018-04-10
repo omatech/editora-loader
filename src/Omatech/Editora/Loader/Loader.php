@@ -444,8 +444,8 @@ function clean_url( $url, $id = '') {
 			}
 		}
 
-		$external_id = $conn->quote($external_id);
-		$batch_id = $conn->quote($batch_id);
+		$external_id = self::$conn->quote($external_id);
+		$batch_id = self::$conn->quote($batch_id);
 
 		$sql = "insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date, external_id, batch_id)
 						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), 0, $external_id, $batch_id)";
