@@ -77,6 +77,54 @@ class Loader {
 		return true;
 	}
 
+function clean_url( $url, $id = '') {
+	if ('' == $url) return $url;
+	$url = trim($url);
+	$url=strip_tags($url);
+
+	$search = array(
+		"à", "á", "â", "ã", "ä", "À", "Á", "Â", "Ã", "Ä",
+		"è", "é", "ê", "ë", "È", "É", "Ê", "Ë",
+		"ì", "í", "î", "ï", "Ì", "Í", "Î", "Ï",
+		"ó", "ò", "ô", "õ", "ö", "Ó", "Ò", "Ô", "Õ", "Ö",
+		"ú", "ù", "û", "ü", "Ú", "Ù", "Û", "Ü",
+		",", ".", ";", ":", "`", "´", "<", ">", "?", "}",
+		"{", "ç", "Ç", "~", "^", "Ñ", "ñ"
+	);
+	$change = array(
+		"a", "a", "a", "a", "a", "A", "A", "A", "A", "A",
+		"e", "e", "e", "e", "E", "E", "E", "E",
+		"i", "i", "i", "i", "I", "I", "I", "I",
+		"o", "o", "o", "o", "o", "O", "O", "O", "O", "O",
+		"u", "u", "u", "u", "U", "U", "U", "U",
+		" ", "-", " ", " ", " ", " ", " ", " ", " ", " ",
+		" ", "c", "C", " ", " ", "NY", "ny"
+	);
+
+	$url = strtoupper(str_ireplace($search,$change,$url));
+	$temp=explode("/",$url);
+	$url=$temp[count($temp)-1];
+
+	$url = preg_replace('|[^a-z0-9-~+_. #=&;,/:]|i', '', $url);
+	$url = str_replace('/', '', $url);
+	$url = str_replace(' ', '-', $url);
+	$url = str_replace('&', '', $url);
+	$url = str_replace("'", "", $url);
+	$url = str_replace(';//', '://', $url);
+	$url = preg_replace('/&([^#])(?![a-z]{2,8};)/', '&#038;$1', $url);
+
+	$url=strtolower($url);
+
+	//ultims canvis
+	$url = trim(str_replace("[^ A-Za-z0-9_-]", "", $url));
+	$url = str_replace("[ \t\n\r]+", "-", $url);
+	$url = str_replace("[ -]+", "-", $url);
+
+	if ($id == '') return $url;
+
+	return $url."-".$id;
+}	
+	
 	public function relation_instance_exist($rel_id, $parent_inst_id, $child_inst_id) {
 		$sql = "select id 
 				from omp_relation_instances 
@@ -334,14 +382,14 @@ class Loader {
 		return $inst_id;
 	}
 
-	public function exists_urlnice($nice_url, $inst_id, $language) {
-		$sql = "select count(*) num from omp_niceurl where niceurl='$nice_url' and inst_id=$inst_id and language='$language'";
+	public function exists_urlnice ($nice_url, $language) {
+		$sql = "select count(*) num from omp_niceurl where niceurl='$nice_url' and language='$language'";
 		$num = self::$conn->fetchColumn($sql);
 		return $num > 0;
 	}
 
 	public function update_urlnice($nice_url, $inst_id, $language) {
-		if ($this->exists_urlnice($nice_url, $inst_id, $language)) return -1;
+		if ($this->exists_urlnice($nice_url, $language)) return -1;
 
 		$sql = "update omp_niceurl set niceurl='$nice_url' where inst_id=$inst_id and language='$language'";
 		self::$conn->executeQuery($sql);
@@ -352,7 +400,7 @@ class Loader {
 
 	public function insert_urlnice($nice_url, $inst_id, $language) 
 	{
-		if ($this->exists_urlnice($nice_url, $inst_id, $language)) return -1;
+		if ($this->exists_urlnice($nice_url, $language)) return -1;
 
 		$sql = "insert into omp_niceurl 
 						(inst_id, language , niceurl)
