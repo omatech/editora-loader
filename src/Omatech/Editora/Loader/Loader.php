@@ -414,10 +414,16 @@ function clean_url( $url, $id = '') {
 		//$batch_id = self::$conn->quote($batch_id);
 		$sql = "select id from omp_instances where batch_id=$batch_id";
 		$rows = self::$conn->fetchAssoc($sql);
+		if ($rows)
+		{
 		foreach ($rows as $row) {
 			$inst_id = $row['id'];
 			echo "Deleting instance $inst_id\n";
 			$this->delete_instance($inst_id);
+		}
+		}
+ else {
+		echo "Nothing to delete for batch_id=$batch_id\n";	
 		}
 	}
 
