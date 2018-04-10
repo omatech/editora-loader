@@ -675,6 +675,14 @@ function clean_url( $url, $id = '') {
 	}
 
 	public function insert_update_image_val($inst_id, $atri_id, $value) {
+		
+		if (substr($value,0,7)=='http://' || substr($value,0,8)=='https://')
+		{
+			$img = self::$file_base.'downloaded/'.$inst_id.'-'.$atri_id.'.png';
+			file_put_contents($img, file_get_contents($value));
+			$value='downloaded/'.$inst_id.'-'.$atri_id.'.png';
+		}
+		
 		if (!file_exists(self::$file_base . $value))
 			die("No existe el fichero " . self::$file_base . $value . ", error!\n");
 
