@@ -678,7 +678,7 @@ function clean_url( $url, $id = '') {
 		
 		if (substr($value,0,7)=='http://' || substr($value,0,8)=='https://')
 		{
-			$img = self::$file_base.'downloaded/'.$inst_id.'-'.$atri_id.'.png';
+			$img = self::$file_base.self::$url_base.'downloaded/'.$inst_id.'-'.$atri_id.'.png';
 			file_put_contents($img, file_get_contents($value));
 			$value='downloaded/'.$inst_id.'-'.$atri_id.'.png';
 		}
