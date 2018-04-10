@@ -680,7 +680,7 @@ function clean_url( $url, $id = '') {
 		{
 			$img = self::$file_base.self::$url_base.'downloaded/'.$inst_id.'-'.$atri_id.'.png';
 			file_put_contents($img, file_get_contents($value));
-			$value='downloaded/'.$inst_id.'-'.$atri_id.'.png';
+			$value=self::$url_base.'downloaded/'.$inst_id.'-'.$atri_id.'.png';
 		}
 		
 		if (!file_exists(self::$file_base . $value))
