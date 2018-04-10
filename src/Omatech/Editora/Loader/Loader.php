@@ -416,6 +416,7 @@ function clean_url( $url, $id = '') {
 		$rows = self::$conn->fetchAssoc($sql);
 		foreach ($rows as $row) {
 			$inst_id = $row['id'];
+			echo "Deleting instance $inst_id\n";
 			$this->delete_instance($inst_id);
 		}
 	}
