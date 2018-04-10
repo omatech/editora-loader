@@ -411,7 +411,7 @@ function clean_url( $url, $id = '') {
 	}
 
 	public function delete_instances_in_batch($batch_id) {
-		$batch_id = self::$conn->quote($batch_id);
+		//$batch_id = self::$conn->quote($batch_id);
 		$sql = "select id from omp_instances where batch_id=$batch_id";
 		$rows = self::$conn->fetchAllAssoc($sql);
 		foreach ($rows as $row) {
