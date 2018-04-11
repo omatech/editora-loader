@@ -483,7 +483,7 @@ class Loader {
 		}
 
 
-		$sql = "update omp_instances set update_date=now() where id=$inst_id";
+		$sql = "update omp_instances set update_date=$update_date where id=$inst_id";
 		self::$conn->executeQuery($sql);
 
 		self::$conn->executeQuery('commit');
