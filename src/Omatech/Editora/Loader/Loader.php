@@ -428,6 +428,14 @@ class Loader {
 			echo "Nothing to delete for batch_id=$batch_id\n";
 		}
 	}
+	
+	public function exists_instance_with_external_id ($class_id, $external_id)
+	{// return false if not exists, inst_id if exists
+		$external_id=self::$conn->quote($external_id);
+		$sql="select id from omp_instances where external_id=$external_id and class_id=$class_id limit one";
+		$inst_id=self::$conn->fetchColumn($sql);
+		return $inst_id;
+	}
 
 	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null) {
 		self::$conn->executeQuery('start transaction');
