@@ -465,7 +465,7 @@ class Loader {
 		$batch_id = self::$conn->quote($batch_id);
 
 		$sql = "insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date, external_id, batch_id)
-						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), 0, $external_id, $batch_id)";
+						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), now(), $external_id, $batch_id)";
 		self::$conn->executeQuery($sql);
 		$inst_id = self::$conn->lastInsertId();
 
@@ -514,7 +514,7 @@ class Loader {
 		}
 
 		$sql = "insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date)
-						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), 0)";
+						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), now())";
 		self::$conn->executeQuery($sql);
 		$inst_id = self::$conn->lastInsertId();
 
