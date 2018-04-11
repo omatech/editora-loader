@@ -696,7 +696,7 @@ class Loader {
 		if (substr($value, 0, 7) == 'http://' || substr($value, 0, 8) == 'https://') {
 			$img = self::$file_base . self::$url_base . 'downloaded/' . $inst_id . '-' . $atri_id . '.png';
 			file_put_contents($img, file_get_contents($value));
-			$value = self::$url_base . 'downloaded/' . $inst_id . '-' . $atri_id . '.png';
+			$value = 'downloaded/' . $inst_id . '-' . $atri_id . '.png';
 		}
 
 		if (!file_exists(self::$file_base . $value))
