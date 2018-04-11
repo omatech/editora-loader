@@ -697,12 +697,20 @@ class Loader {
 			$img = self::$file_base . self::$url_base . 'downloaded/' . $inst_id . '-' . $atri_id . '.png';
 			file_put_contents($img, file_get_contents($value));
 			$value = '/downloaded/' . $inst_id . '-' . $atri_id . '.png';
-		}
+			if (!file_exists(self::$file_base.self::$url_base . $value))
+				die("No existe el fichero " . self::$file_base.self::$url_base . $value . ", error!\n");
 
+			list($width, $height) = getimagesize(self::$file_base . $value);
+		}
+		else
+		{
 		if (!file_exists(self::$file_base . $value))
 			die("No existe el fichero " . self::$file_base . $value . ", error!\n");
 
 		list($width, $height) = getimagesize(self::$file_base . $value);
+			
+		}
+
 		$value = self::$conn->quote(self::$url_base . $value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
