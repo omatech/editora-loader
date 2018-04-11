@@ -432,7 +432,7 @@ class Loader {
 	public function exists_instance_with_external_id ($class_id, $external_id)
 	{// return false if not exists, inst_id if exists
 		$external_id=self::$conn->quote($external_id);
-		$sql="select id from omp_instances where external_id=$external_id and class_id=$class_id limit one";
+		$sql="select id from omp_instances where external_id=$external_id and class_id=$class_id limit 1";
 		$inst_id=self::$conn->fetchColumn($sql);
 		return $inst_id;
 	}
