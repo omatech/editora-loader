@@ -489,6 +489,11 @@ class Loader {
 		self::$conn->executeQuery('commit');
 		return $inst_id;
 	}
+	
+	public function quote ($str)
+	{
+		return self::$conn->quote($str);
+	}
 
 	public function insert_instance($class_id, $nom_intern, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null) {
 		self::$conn->executeQuery('start transaction');
