@@ -437,7 +437,7 @@ class Loader {
 		return $inst_id;
 	}
 
-	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null) {
+	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null, $creation_date='now()', $update_date='now()') {
 		self::$conn->executeQuery('start transaction');
 		$status = self::$conn->quote($status);
 
@@ -465,7 +465,7 @@ class Loader {
 		$batch_id = self::$conn->quote($batch_id);
 
 		$sql = "insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date, external_id, batch_id)
-						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), now(), $external_id, $batch_id)";
+						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, $creation_date, $update_date, $external_id, $batch_id)";
 		self::$conn->executeQuery($sql);
 		$inst_id = self::$conn->lastInsertId();
 
