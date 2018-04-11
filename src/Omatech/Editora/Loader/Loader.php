@@ -700,7 +700,7 @@ class Loader {
 			if (!file_exists(self::$file_base.self::$url_base . $value))
 				die("No existe el fichero " . self::$file_base.self::$url_base . $value . ", error!\n");
 
-			list($width, $height) = getimagesize(self::$file_base . $value);
+			list($width, $height) = getimagesize(self::$file_base.self::$url_base . $value);
 		}
 		else
 		{
