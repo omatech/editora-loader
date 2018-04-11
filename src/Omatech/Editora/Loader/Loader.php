@@ -544,7 +544,7 @@ class Loader {
 		return $inst_id;
 	}
 
-	private function update_values($inst_id, $values) {
+	public function update_values($inst_id, $values) {
 		$results = array();
 		foreach ($values as $key => $value) {
 			$attr_info = self::get_attr_info($key);
