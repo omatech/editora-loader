@@ -437,6 +437,7 @@ class Loader {
 		return $inst_id;
 	}
 
+	
 	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null, $creation_date='now()', $update_date='now()') {
 		self::$conn->executeQuery('start transaction');
 		$status = self::$conn->quote($status);
