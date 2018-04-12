@@ -29,10 +29,10 @@ class Loader {
 			}
 			$conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
 		}
-		self::$file_base = $file_base;
-		self::$url_base = $url_base;
-		self::$conn = $conn;
-		self::$geocoder = $geocoder;
+		$this->file_base = $file_base;
+		$this->url_base = $url_base;
+		$this->conn = $conn;
+		$this->geocoder = $geocoder;
 	}
 
 	public function delete_instance($inst_id) {
@@ -550,7 +550,7 @@ class Loader {
 	public function update_values($inst_id, $values) {
 		$results = array();
 		foreach ($values as $key => $value) {
-			$attr_info = self::get_attr_info($key);
+			$attr_info = $this->get_attr_info($key);
 			if (empty($attr_info)) {
 				echo("No existeix l'attribut: $key\n");
 				return false;
@@ -612,7 +612,7 @@ class Loader {
 	}
 
 	public function insert_update_geopos_val($inst_id, $atri_id, $value) {
-		$geoinfo = self::$geocoder->geocode($value);
+		$geoinfo = $this->$geocoder->geocode($value);
 		//print_r($geoinfo);die;
 		$value = $this->conn->quote($geoinfo['lat'] . ':' . $geoinfo['lng'] . '@' . $value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
@@ -705,7 +705,7 @@ class Loader {
 		if (substr($value, 0, 7) == 'http://' || substr($value, 0, 8) == 'https://') {
 			$file_name=basename($value);
 			if (stripos($file_name, '.')===false) $file_name=$file_name.'.png';
-			$img_file = self::$file_base . self::$url_base . 'downloaded/' . $file_name;
+			$img_file = $this->file_base . $this->url_base . 'downloaded/' . $file_name;
 			if (!file_exists($img_file))
 				file_put_contents($img_file, file_get_contents($value));
 			$value = '/downloaded/' . $file_name;
@@ -714,13 +714,13 @@ class Loader {
 			list($width, $height) = getimagesize($img_file);
 		}
 		else {
-			if (!file_exists(self::$file_base . $value))
-				die("No existe el fichero " . self::$file_base . $value . ", error!\n");
+			if (!file_exists($this->file_base . $value))
+				die("No existe el fichero " . $this->file_base . $value . ", error!\n");
 
-			list($width, $height) = getimagesize(self::$file_base . $value);
+			list($width, $height) = getimagesize($this->file_base . $value);
 		}
 
-		$value = $this->conn->quote(self::$url_base . $value);
+		$value = $this->conn->quote($this->url_base . $value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
 						set v.text_val=$value
