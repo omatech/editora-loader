@@ -694,12 +694,11 @@ class Loader {
 		self::$conn->executeQuery($sql);
 	}
 
-	public function insert_update_image_val($inst_id, $atri_id, $value, $file_name = null) {
+	public function insert_update_image_val($inst_id, $atri_id, $value) {
 
 		if (substr($value, 0, 7) == 'http://' || substr($value, 0, 8) == 'https://') {
-			if ($file_name != null) {
-				$file_name = $inst_id . '-' . $atri_id . '.png';
-			}
+			$file_name=basename($value);
+			if (stripos($file_name, '.')===false) $file_name=$file_name.'.png';
 			$img_file = self::$file_base . self::$url_base . 'downloaded/' . $file_name;
 			if (!file_exists($img_file))
 				file_put_contents($img_file, file_get_contents($value));
