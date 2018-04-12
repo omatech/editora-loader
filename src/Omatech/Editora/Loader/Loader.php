@@ -7,10 +7,10 @@ use \Doctrine\DBAL\DriverManager;
 class Loader {
 
 	public $debug_messages = '';
-	public static $file_base = '';
-	public static $url_base = '';
-	public static $geocoder;
-	public static $conn;
+	public $file_base = '';
+	public $url_base = '';
+	public $geocoder;
+	public $conn;
 
 	public function __construct($conn, $file_base, $url_base, $geocoder = null, $debug = false) {
 		if (is_array($conn)) {
@@ -36,43 +36,41 @@ class Loader {
 	}
 
 	public function delete_instance($inst_id) {
-		self::$conn->executeQuery('start transaction');
 		$sql_values = 'DELETE
 				FROM omp_values 
 				WHERE inst_id = "' . $inst_id . '"';
-		self::$conn->executeQuery($sql_values);
+		$this->conn->executeQuery($sql_values);
 		//$ret_values = mysql_query($sql_values);
 
 		$sql_inst_child = 'DELETE
 				FROM omp_relation_instances 
 				WHERE child_inst_id = "' . $inst_id . '"';
-		self::$conn->executeQuery($sql_inst_child);
+		$this->conn->executeQuery($sql_inst_child);
 		//$ret_inst_child = mysql_query($sql_inst_child);
 
 		$sql_inst_parent = 'DELETE
 				FROM omp_relation_instances 
 				WHERE parent_inst_id = "' . $inst_id . '"';
-		self::$conn->executeQuery($sql_inst_parent);
+		$this->conn->executeQuery($sql_inst_parent);
 		//$ret_inst_parent = mysql_query($sql_inst_parent);
 
 		$sql_inst = 'DELETE 
 				FROM omp_instances 
 				WHERE id = "' . $inst_id . '"';
-		self::$conn->executeQuery($sql_inst);
+		$this->conn->executeQuery($sql_inst);
 		//$ret_inst = mysql_query($sql_inst);
 
 		$sql_inst = 'DELETE 
 				FROM omp_niceurl 
 				WHERE inst_id = "' . $inst_id . '"';
-		self::$conn->executeQuery($sql_inst);
+		$this->conn->executeQuery($sql_inst);
 		//$ret_inst = mysql_query($sql_inst);
 
 		$sql_inst = 'DELETE 
 				FROM omp_instances_cache 
 				WHERE inst_id = "' . $inst_id . '"';
-		self::$conn->executeQuery($sql_inst);
+		$this->conn->executeQuery($sql_inst);
 		//$ret_inst = mysql_query($sql_inst);
-		self::$conn->executeQuery('commit');
 
 		return true;
 	}
@@ -133,7 +131,7 @@ class Loader {
 				where rel_id=$rel_id 
 				and parent_inst_id=$parent_inst_id 
 				and child_inst_id=$child_inst_id;";
-		$row = self::$conn->fetchAssoc($sql);
+		$row = $this->conn->fetchAssoc($sql);
 		if ($row) {
 			return $row['id'];
 		}
@@ -152,7 +150,7 @@ class Loader {
 						and ri.rel_id=$rel_id
 						GROUP BY ri.rel_id, ri.parent_inst_id";
 
-			$weight_row = self::$conn->fetchAssoc($sql);
+			$weight_row = $this->conn->fetchAssoc($sql);
 
 			if (empty($weight_row) || $weight_row["weight"] == -10) {
 				$weight = 100000;
@@ -165,14 +163,14 @@ class Loader {
 						(rel_id, parent_inst_id , child_inst_id, weight, relation_date)
 						values
 						($rel_id, $parent_inst_id, $child_inst_id, $weight, NOW())";
-			$ret = self::$conn->executeQuery($sql);
-			return self::$conn->lastInsertId();
+			$ret = $this->conn->executeQuery($sql);
+			return $this->conn->lastInsertId();
 		}
 	}
 
 	public function get_inst_id_from_nom_intern($class_tag, $nom_intern) {// retorna -1 si no existeix la instancia d'aquesta class amb el nom intern indicat
-		$class_tag = self::$conn->quote($class_tag);
-		$nom_intern = self::$conn->quote($nom_intern);
+		$class_tag = $this->conn->quote($class_tag);
+		$nom_intern = $this->conn->quote($nom_intern);
 
 		$sql = "SELECT i.id
 				FROM omp_instances i
@@ -183,7 +181,7 @@ class Loader {
 				AND i.key_fields=$nom_intern
 				";
 
-		$row = self::$conn->fetchAssoc($sql);
+		$row = $this->conn->fetchAssoc($sql);
 
 		if ($row) {
 			return $row['id'];
@@ -192,8 +190,8 @@ class Loader {
 	}
 
 	public function get_inst_id_from_value($class_tag, $atri, $value) {// retorna -1 si no existeix la instancia d'aquesta class o el id si existeix
-		$class_tag = self::$conn->quote($class_tag);
-		$value = self::$conn->quote($value);
+		$class_tag = $this->conn->quote($class_tag);
+		$value = $this->conn->quote($value);
 
 		$atri_info = $this->get_attr_info($atri);
 		$atri_id = $atri_info['id'];
@@ -210,7 +208,7 @@ class Loader {
 				AND v.text_val = $value
 				";
 
-		$row = self::$conn->fetchAssoc($sql);
+		$row = $this->conn->fetchAssoc($sql);
 
 		if ($row) {
 			return $row['id'];
@@ -219,8 +217,8 @@ class Loader {
 	}
 
 	public function get_inst_id_from_numeric_value($class_tag, $atri, $value) {// retorna -1 si no existeix la instancia d'aquesta class o el id si existeix
-		$class_tag = self::$conn->quote($class_tag);
-		//$value = self::$conn->quote($value);
+		$class_tag = $this->conn->quote($class_tag);
+		//$value = $this->conn->quote($value);
 
 		$atri_info = $this->get_attr_info($atri);
 		$atri_id = $atri_info['id'];
@@ -237,7 +235,7 @@ class Loader {
 				AND v.num_val = $value
 				";
 
-		$row = self::$conn->fetchAssoc($sql);
+		$row = $this->conn->fetchAssoc($sql);
 
 		if ($row) {
 			return $row['id'];
@@ -249,7 +247,7 @@ class Loader {
 		$sql = "select * 
 				from omp_instances
 				where id=$inst_id";
-		$current_inst = self::$conn->fetchAssoc($sql);
+		$current_inst = $this->conn->fetchAssoc($sql);
 
 		$sql = "select a.name, a.type, v.text_val, v.num_val, v.date_val 
 				from omp_values v
@@ -257,7 +255,7 @@ class Loader {
 				where a.id=v.atri_id
 				and v.inst_id=$inst_id";
 
-		$rows = self::$conn->fetchAll($sql);
+		$rows = $this->conn->fetchAll($sql);
 
 		$current_inst['values'] = $rows;
 		return $current_inst;
@@ -268,7 +266,7 @@ class Loader {
 				from omp_instances
 				where id=$inst_id
 				";
-		$row = self::$conn->fetchAssoc($sql);
+		$row = $this->conn->fetchAssoc($sql);
 		return ($row['num'] == 1);
 	}
 
@@ -327,21 +325,33 @@ class Loader {
 		$difference = 0;
 		return false;
 	}
+	
+	public function start_transaction()
+	{
+		$this->conn->executeQuery('start transaction');		
+	}
+	public function commit()
+	{
+		$this->conn->executeQuery('commit');		
+	}
+		public function rollback()
+	{
+		$this->conn->executeQuery('rollback');		
+	}
 
 	public function update_instance($inst_id, $nom_intern, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null) {
 		if (!$this->exist_instance($inst_id))
 			return false;
 
-		self::$conn->executeQuery('start transaction');
-		$status = self::$conn->quote($status);
+		$status = $this->conn->quote($status);
 
 		if ($publishing_begins == null) {
 			$publishing_begins = 'now()';
 		} else {
 			if (is_int($publishing_begins)) {// es un timestamp
-				$publishing_begins = self::$conn->quote(date("Y-m-d H:m:s", $publishing_begins));
+				$publishing_begins = $this->conn->quote(date("Y-m-d H:m:s", $publishing_begins));
 			} else {// confiem que esta en el format correcte
-				$publishing_begins = self::$conn->quote($publishing_begins);
+				$publishing_begins = $this->conn->quote($publishing_begins);
 			}
 		}
 
@@ -349,44 +359,43 @@ class Loader {
 			$publishing_ends = 'null';
 		} else {
 			if (is_int($publishing_ends)) {// es un timestamp
-				$publishing_ends = self::$conn->quote(date("Y-m-d H:m:s", $publishing_ends));
+				$publishing_ends = $this->conn->quote(date("Y-m-d H:m:s", $publishing_ends));
 			} else {// confiem que esta en el format correcte
-				$publishing_ends = self::$conn->quote($publishing_ends);
+				$publishing_ends = $this->conn->quote($publishing_ends);
 			}
 		}
 
 		$sql = "update omp_instances
-				set key_fields=" . self::$conn->quote($nom_intern) . "
+				set key_fields=" . $this->conn->quote($nom_intern) . "
 				, status=$status
 				, publishing_begins=$publishing_begins
 				, publishing_ends=$publishing_ends
 				, update_date=now()
 				where id=$inst_id
 				";
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 
 		$ret = $this->update_values($inst_id, array('nom_intern' => $nom_intern));
 		if (!$ret) {
-			self::$conn->executeQuery('rollback');
+			$this->conn->executeQuery('rollback');
 			return false;
 		}
 
 		$ret = $this->update_values($inst_id, $values);
 		if (!$ret) {
-			self::$conn->executeQuery('rollback');
+			$this->conn->executeQuery('rollback');
 			return false;
 		}
 
 		$sql = "update omp_instances set update_date=now() where id=$inst_id";
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 
-		self::$conn->executeQuery('commit');
 		return $inst_id;
 	}
 
 	public function exists_urlnice($nice_url, $language) {
 		$sql = "select count(*) num from omp_niceurl where niceurl='$nice_url' and language='$language'";
-		$num = self::$conn->fetchColumn($sql);
+		$num = $this->conn->fetchColumn($sql);
 		return $num > 0;
 	}
 
@@ -395,9 +404,8 @@ class Loader {
 			return -1;
 
 		$sql = "update omp_niceurl set niceurl='$nice_url' where inst_id=$inst_id and language='$language'";
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 
-		self::$conn->executeQuery('commit');
 		return $inst_id;
 	}
 
@@ -409,14 +417,14 @@ class Loader {
 						(inst_id, language , niceurl)
 						values
 						($inst_id, '$language','$nice_url')";
-		$ret = self::$conn->executeQuery($sql);
-		return self::$conn->lastInsertId();
+		$ret = $this->conn->executeQuery($sql);
+		return $this->conn->lastInsertId();
 	}
 
 	public function delete_instances_in_batch($batch_id) {
-		//$batch_id = self::$conn->quote($batch_id);
+		//$batch_id = $this->conn->quote($batch_id);
 		$sql = "select id from omp_instances where batch_id=$batch_id";
-		$rows = self::$conn->fetchAll($sql);
+		$rows = $this->conn->fetchAll($sql);
 
 		if ($rows) {
 			foreach ($rows as $row) {
@@ -430,23 +438,23 @@ class Loader {
 	}
 
 	public function exists_instance_with_external_id($class_id, $external_id) {// return false if not exists, inst_id if exists
-		$external_id = self::$conn->quote($external_id);
+		$external_id = $this->conn->quote($external_id);
 		$sql = "select id from omp_instances where external_id=$external_id and class_id=$class_id limit 1";
-		$inst_id = self::$conn->fetchColumn($sql);
+		$inst_id = $this->conn->fetchColumn($sql);
 		return $inst_id;
 	}
 
 	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null, $creation_date = 'now()', $update_date = 'now()') {
-		self::$conn->executeQuery('start transaction');
-		$status = self::$conn->quote($status);
+
+		$status = $this->conn->quote($status);
 
 		if ($publishing_begins == null) {
 			$publishing_begins = 'now()';
 		} else {
 			if (is_int($publishing_begins)) {// es un timestamp
-				$publishing_begins = self::$conn->quote(date("Y-m-d H:m:s", $publishing_begins));
+				$publishing_begins = $this->conn->quote(date("Y-m-d H:m:s", $publishing_begins));
 			} else {// confiem que esta en el format correcte
-				$publishing_begins = self::$conn->quote($publishing_begins);
+				$publishing_begins = $this->conn->quote($publishing_begins);
 			}
 		}
 
@@ -454,55 +462,54 @@ class Loader {
 			$publishing_ends = 'null';
 		} else {
 			if (is_int($publishing_ends)) {// es un timestamp
-				$publishing_ends = self::$conn->quote(date("Y-m-d H:m:s", $publishing_ends));
+				$publishing_ends = $this->conn->quote(date("Y-m-d H:m:s", $publishing_ends));
 			} else {// confiem que esta en el format correcte
-				$publishing_ends = self::$conn->quote($publishing_ends);
+				$publishing_ends = $this->conn->quote($publishing_ends);
 			}
 		}
 
-		$external_id = self::$conn->quote($external_id);
-		$batch_id = self::$conn->quote($batch_id);
+		$external_id = $this->conn->quote($external_id);
+		$batch_id = $this->conn->quote($batch_id);
 
 		$sql = "insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date, external_id, batch_id)
-						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, $creation_date, $update_date, $external_id, $batch_id)";
-		self::$conn->executeQuery($sql);
-		$inst_id = self::$conn->lastInsertId();
+						values ($class_id, " . $this->conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, $creation_date, $update_date, $external_id, $batch_id)";
+		$this->conn->executeQuery($sql);
+		$inst_id = $this->conn->lastInsertId();
 
 		$ret = $this->update_values($inst_id, array('nom_intern' => $nom_intern));
 		if (!$ret) {
-			self::$conn->executeQuery('rollback');
+			$this->conn->executeQuery('rollback');
 			return false;
 		}
 
 		$ret = $this->update_values($inst_id, $values);
 		if (!$ret) {
-			self::$conn->executeQuery('rollback');
+			$this->conn->executeQuery('rollback');
 			return false;
 		}
 
 
 		$sql = "update omp_instances set update_date=$update_date where id=$inst_id";
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 
-		self::$conn->executeQuery('commit');
 		return $inst_id;
 	}
 
 	public function quote($str) {
-		return self::$conn->quote($str);
+		return $this->conn->quote($str);
 	}
 
 	public function insert_instance($class_id, $nom_intern, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null) {
-		self::$conn->executeQuery('start transaction');
-		$status = self::$conn->quote($status);
+
+		$status = $this->conn->quote($status);
 
 		if ($publishing_begins == null) {
 			$publishing_begins = 'now()';
 		} else {
 			if (is_int($publishing_begins)) {// es un timestamp
-				$publishing_begins = self::$conn->quote(date("Y-m-d H:m:s", $publishing_begins));
+				$publishing_begins = $this->conn->quote(date("Y-m-d H:m:s", $publishing_begins));
 			} else {// confiem que esta en el format correcte
-				$publishing_begins = self::$conn->quote($publishing_begins);
+				$publishing_begins = $this->conn->quote($publishing_begins);
 			}
 		}
 
@@ -510,34 +517,33 @@ class Loader {
 			$publishing_ends = 'null';
 		} else {
 			if (is_int($publishing_ends)) {// es un timestamp
-				$publishing_ends = self::$conn->quote(date("Y-m-d H:m:s", $publishing_ends));
+				$publishing_ends = $this->conn->quote(date("Y-m-d H:m:s", $publishing_ends));
 			} else {// confiem que esta en el format correcte
-				$publishing_ends = self::$conn->quote($publishing_ends);
+				$publishing_ends = $this->conn->quote($publishing_ends);
 			}
 		}
 
 		$sql = "insert into omp_instances (class_id, key_fields, status, publishing_begins, publishing_ends, creation_date, update_date)
-						values ($class_id, " . self::$conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), now())";
-		self::$conn->executeQuery($sql);
-		$inst_id = self::$conn->lastInsertId();
+						values ($class_id, " . $this->conn->quote($nom_intern) . ", $status, $publishing_begins, $publishing_ends, now(), now())";
+		$this->conn->executeQuery($sql);
+		$inst_id = $this->conn->lastInsertId();
 
 		$ret = $this->update_values($inst_id, ['nom_intern' => $nom_intern]);
 		if (!$ret) {
-			self::$conn->executeQuery('rollback');
+			$this->conn->executeQuery('rollback');
 			return false;
 		}
 
 		$ret = $this->update_values($inst_id, $values);
 		if (!$ret) {
-			self::$conn->executeQuery('rollback');
+			$this->conn->executeQuery('rollback');
 			return false;
 		}
 
 
 		$sql = "update omp_instances set update_date=now() where id=$inst_id";
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 
-		self::$conn->executeQuery('commit');
 		return $inst_id;
 	}
 
@@ -570,17 +576,17 @@ class Loader {
 
 	protected function get_attr_info($key) {
 		if (is_numeric($key)) {
-			$key = self::$conn->quote($key);
+			$key = $this->conn->quote($key);
 			$sql = "SELECT * FROM omp_attributes where id=$key";
 		} else {
-			$key = self::$conn->quote($key);
+			$key = $this->conn->quote($key);
 			$sql = "SELECT * FROM omp_attributes where name=$key";
 		}
-		return self::$conn->fetchAssoc($sql);
+		return $this->conn->fetchAssoc($sql);
 	}
 
 	protected function get_lookup_value_id($lookup_id, $value) {
-		$value = self::$conn->quote($value);
+		$value = $this->conn->quote($value);
 
 		$sql = "select lv.id
 				from omp_lookups_values lv
@@ -592,7 +598,7 @@ class Loader {
 				)
 				";
 
-		return self::$conn->fetchAssoc($sql);
+		return $this->conn->fetchAssoc($sql);
 	}
 
 	public function exist_value($inst_id, $atri_id) {
@@ -601,14 +607,14 @@ class Loader {
 				where v.inst_id=$inst_id
 				and v.atri_id=$atri_id
 				";
-		$row = self::$conn->fetchAssoc($sql);
+		$row = $this->conn->fetchAssoc($sql);
 		return ($row['num'] == 1);
 	}
 
 	public function insert_update_geopos_val($inst_id, $atri_id, $value) {
 		$geoinfo = self::$geocoder->geocode($value);
 		//print_r($geoinfo);die;
-		$value = self::$conn->quote($geoinfo['lat'] . ':' . $geoinfo['lng'] . '@' . $value);
+		$value = $this->conn->quote($geoinfo['lat'] . ':' . $geoinfo['lng'] . '@' . $value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
 						set v.text_val=$value
@@ -620,11 +626,11 @@ class Loader {
 			$sql = "insert into omp_values (inst_id, atri_id, text_val)
 						values ($inst_id, $atri_id, $value)";
 		}
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 	}
 
 	public function insert_update_text_val($inst_id, $atri_id, $value) {
-		$value = self::$conn->quote($value);
+		$value = $this->conn->quote($value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
 						set v.text_val=$value
@@ -636,7 +642,7 @@ class Loader {
 			$sql = "insert into omp_values (inst_id, atri_id, text_val)
 						values ($inst_id, $atri_id, $value)";
 		}
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 	}
 
 	public function insert_update_lookup_val($inst_id, $atri_id, $lookup_id, $value) {
@@ -659,11 +665,11 @@ class Loader {
 			$sql = "insert into omp_values (inst_id, atri_id, num_val)
 						values ($inst_id, $atri_id, $value)";
 		}
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 	}
 
 	public function insert_update_num_val($inst_id, $atri_id, $value) {
-		$value = self::$conn->quote($value);
+		$value = $this->conn->quote($value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
 						set v.num_val=$value
@@ -675,11 +681,11 @@ class Loader {
 			$sql = "insert into omp_values (inst_id, atri_id, num_val)
 						values ($inst_id, $atri_id, $value)";
 		}
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 	}
 
 	public function insert_update_date_val($inst_id, $atri_id, $value) {
-		$value = self::$conn->quote($value);
+		$value = $this->conn->quote($value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
 						set v.date_val=$value
@@ -691,7 +697,7 @@ class Loader {
 			$sql = "insert into omp_values (inst_id, atri_id, date_val)
 						values ($inst_id, $atri_id, $value)";
 		}
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 	}
 
 	public function insert_update_image_val($inst_id, $atri_id, $value) {
@@ -714,7 +720,7 @@ class Loader {
 			list($width, $height) = getimagesize(self::$file_base . $value);
 		}
 
-		$value = self::$conn->quote(self::$url_base . $value);
+		$value = $this->conn->quote(self::$url_base . $value);
 		if ($this->exist_value($inst_id, $atri_id)) {// update
 			$sql = "update omp_values v
 						set v.text_val=$value
@@ -727,7 +733,7 @@ class Loader {
 			$sql = "insert into omp_values (inst_id, atri_id, text_val, img_info)
 						values ($inst_id, $atri_id, $value, '$width.$height')";
 		}
-		self::$conn->executeQuery($sql);
+		$this->conn->executeQuery($sql);
 	}
 
 }
