@@ -417,7 +417,7 @@ class Loader {
 		//$batch_id = self::$conn->quote($batch_id);
 		$sql = "select id from omp_instances where batch_id=$batch_id";
 		$rows = self::$conn->fetchAll($sql);
-		
+
 		if ($rows) {
 			foreach ($rows as $row) {
 				$inst_id = $row['id'];
@@ -428,17 +428,15 @@ class Loader {
 			echo "Nothing to delete for batch_id=$batch_id\n";
 		}
 	}
-	
-	public function exists_instance_with_external_id ($class_id, $external_id)
-	{// return false if not exists, inst_id if exists
-		$external_id=self::$conn->quote($external_id);
-		$sql="select id from omp_instances where external_id=$external_id and class_id=$class_id limit 1";
-		$inst_id=self::$conn->fetchColumn($sql);
+
+	public function exists_instance_with_external_id($class_id, $external_id) {// return false if not exists, inst_id if exists
+		$external_id = self::$conn->quote($external_id);
+		$sql = "select id from omp_instances where external_id=$external_id and class_id=$class_id limit 1";
+		$inst_id = self::$conn->fetchColumn($sql);
 		return $inst_id;
 	}
 
-	
-	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null, $creation_date='now()', $update_date='now()') {
+	public function insert_instance_with_external_id($class_id, $nom_intern, $external_id, $batch_id, $values, $status = 'O', $publishing_begins = null, $publishing_ends = null, $creation_date = 'now()', $update_date = 'now()') {
 		self::$conn->executeQuery('start transaction');
 		$status = self::$conn->quote($status);
 
@@ -489,9 +487,8 @@ class Loader {
 		self::$conn->executeQuery('commit');
 		return $inst_id;
 	}
-	
-	public function quote ($str)
-	{
+
+	public function quote($str) {
 		return self::$conn->quote($str);
 	}
 
@@ -697,24 +694,25 @@ class Loader {
 		self::$conn->executeQuery($sql);
 	}
 
-	public function insert_update_image_val($inst_id, $atri_id, $value) {
+	public function insert_update_image_val($inst_id, $atri_id, $value, $file_name = null) {
 
 		if (substr($value, 0, 7) == 'http://' || substr($value, 0, 8) == 'https://') {
-			$img = self::$file_base . self::$url_base . 'downloaded/' . $inst_id . '-' . $atri_id . '.png';
-			file_put_contents($img, file_get_contents($value));
-			$value = '/downloaded/' . $inst_id . '-' . $atri_id . '.png';
-			if (!file_exists(self::$file_base.self::$url_base . $value))
-				die("No existe el fichero " . self::$file_base.self::$url_base . $value . ", error!\n");
-
-			list($width, $height) = getimagesize(self::$file_base.self::$url_base . $value);
+			if ($file_name != null) {
+				$file_name = $inst_id . '-' . $atri_id . '.png';
+			}
+			$img_file = self::$file_base . self::$url_base . 'downloaded/' . $file_name;
+			if (!file_exists($img_file))
+				file_put_contents($img_file, file_get_contents($value));
+			$value = '/downloaded/' . $file_name;
+			if (!file_exists($img_file))
+				die("No existe el fichero " . $img_file . ", error!\n");
+			list($width, $height) = getimagesize($img_file);
 		}
-		else
-		{
-		if (!file_exists(self::$file_base . $value))
-			die("No existe el fichero " . self::$file_base . $value . ", error!\n");
+		else {
+			if (!file_exists(self::$file_base . $value))
+				die("No existe el fichero " . self::$file_base . $value . ", error!\n");
 
-		list($width, $height) = getimagesize(self::$file_base . $value);
-			
+			list($width, $height) = getimagesize(self::$file_base . $value);
 		}
 
 		$value = self::$conn->quote(self::$url_base . $value);
