@@ -138,7 +138,7 @@ class Loader {
 		return false;
 	}
 
-	public function insert_relation_instance($rel_id, $parent_inst_id, $child_inst_id) {
+	public function insert_relation_instance($rel_id, $parent_inst_id, $child_inst_id, $external_id=null, $batch_id=null) {
 		$rel_instance_id = $this->relation_instance_exist($rel_id, $parent_inst_id, $child_inst_id);
 		if ($rel_instance_id) {
 			return $rel_instance_id;
@@ -158,11 +158,24 @@ class Loader {
 				$weight = $weight_row["weight"];
 			}
 
-
+			$sql_fields_add='';
+			$sql_values_add='';
+			if ($external_id!=null)
+			{
+				$sql_fields_add.=', external_id';
+				$sql_values_add.=", $external_id";
+			}
+			if ($batch_id!=null)
+			{
+				$sql_fields_add.=', batch_id';
+				$sql_values_add.=", $batch_id";
+			}
+			
+			
 			$sql = "insert into omp_relation_instances 
-						(rel_id, parent_inst_id , child_inst_id, weight, relation_date)
+						(rel_id, parent_inst_id , child_inst_id, weight, relation_date $sql_fields_add)
 						values
-						($rel_id, $parent_inst_id, $child_inst_id, $weight, NOW())";
+						($rel_id, $parent_inst_id, $child_inst_id, $weight, NOW() $sql_values_add)";
 			$ret = $this->conn->executeQuery($sql);
 			return $this->conn->lastInsertId();
 		}
