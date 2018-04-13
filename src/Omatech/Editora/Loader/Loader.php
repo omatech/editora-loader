@@ -449,6 +449,28 @@ class Loader {
 			echo "Nothing to delete for batch_id=$batch_id\n";
 		}
 	}
+	
+	public function delete_relation_instances_in_batch($batch_id) {
+		//$batch_id = $this->conn->quote($batch_id);
+		$sql = "select id from omp_relation_instances where batch_id=$batch_id";
+		$rows = $this->conn->fetchAll($sql);
+
+		if ($rows) {
+			foreach ($rows as $row) {
+				$rel_inst_id = $row['id'];
+				echo "Deleting relation instance $rel_inst_id\n";
+				$this->delete_relation_instance($rel_inst_id);
+			}
+		} else {
+			echo "Nothing to delete for batch_id=$batch_id\n";
+		}
+	}	
+	
+	public function delete_relation_instance ($id)
+	{
+		$sql="delete from omp_relation_instances where id=$id";
+		$this->conn->executeQuery($sql);
+	}
 
 	public function exists_instance_with_external_id($class_id, $external_id) {// return false if not exists, inst_id if exists
 		$external_id = $this->conn->quote($external_id);
