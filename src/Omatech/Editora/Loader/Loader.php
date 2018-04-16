@@ -743,10 +743,12 @@ class Loader {
 			$img_file = $this->file_base . $this->url_base . 'downloaded/' . $file_name;
 			if (!file_exists($img_file))
 				file_put_contents($img_file, file_get_contents($value));
-			$value = '/downloaded/' . $file_name;
+
 			if (!file_exists($img_file))
 				die("No existe el fichero " . $img_file . ", error!\n");
+			
 			list($width, $height) = getimagesize($img_file);
+			$value = 'downloaded/' . $file_name;
 		}
 		else {
 			if (!file_exists($this->file_base . $value))
